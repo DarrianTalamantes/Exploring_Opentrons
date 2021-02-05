@@ -58,6 +58,10 @@ def run(protocol: protocol_api.ProtocolContext):
     # This command will grab 30 ul from reservoirs dispense it to plate and then mix pipette mix 3 times.
     # Without replacing the tip it then picks up more from reservoirs and continues down the wells of plate.
 
+    # right_pipette.transfer(30, reservoirs.wells(11), plate.wells(),  mix_before=(3, 30))
+    # same code as before but with the mix_before. This command mixes before aspirating.
+    # Basically it mixes in the reservoir. Can be useful if you need to resuspend everytime.
+
     # right_pipette.transfer(30, reservoirs.wells(), plate.wells(), trash=False, new_tip='always')
     # This will grab tips from res well 1 transfer 30 ul to plate well 1, put the tips back in tip rack well 1,
     # grab tips from tip rack well 2, do its commands, return the tips and get new ones from tip rack well 3
@@ -104,6 +108,17 @@ def run(protocol: protocol_api.ProtocolContext):
     # The above code is what I call a wash cycle. It will transfer 300 ul from res 2 to res 3. It then
     # mixes 200 ul 5 times. Blows out any extra water in res 2 and puts tips back into box. Then does the
     # same with the next set of tips but from res 3 to res 2
+
+    # right_pipette.distribute(
+    #     [20, 0, 60],
+    #     reservoirs.wells(7),
+    #     [plate.columns_by_name()[col_name] for col_name in ['1', '2', '3']],
+    #     blow_out=True, blowout_location='source well', trash=False
+    #     )
+    # The above code will take liquid from res well 7 and put 20 ul into plate 1 skip plate 2 and
+    # add 60 ul to plate 3. NOTICE!!! I use wells instead of columns_by_name to select a single col
+
+
 
 # Helpfull commands
 # pipette.mix(repetitions, volume, location)
