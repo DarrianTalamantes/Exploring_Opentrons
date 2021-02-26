@@ -12,9 +12,9 @@ metadata = {
 # Variable input below
 
 # Here you input the well location of your colors
-red = 11
-blue = 9
+red = 9
 green = 7
+blue = 5
 
 # Here you input location of labware
 well_plate_loc = 5
@@ -26,7 +26,7 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # labware
     plate = protocol.load_labware('opentrons_96_aluminumblock_biorad_wellplate_200ul', well_plate_loc)
-    tiprack = protocol.load_labware('opentrons_96_tiprack_300ul', tip_rack_loc)
+    tiprack = protocol.load_labware('opentrons_96_filtertiprack_200ul', tip_rack_loc)
     reservoirs = protocol.load_labware('usascientific_12_reservoir_22ml', res_loc)
 
     # pipettes
