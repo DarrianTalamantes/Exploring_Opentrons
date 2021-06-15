@@ -11,7 +11,7 @@ metadata = {
 
 # Variable input below
 
-# Here you input the well location of your colors
+# Here you input the well location of your colors, remember to add one to these positions. Starts at 0 not 1.
 red = 9
 green = 7
 blue = 5
