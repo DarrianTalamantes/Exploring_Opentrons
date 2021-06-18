@@ -32,9 +32,9 @@ def run(protocol: protocol_api.ProtocolContext):
     # Sample information
     starting_sample = 21  # This is your current sample number. THe one the machine will start on
     loaded_samples = 4  # This is how many samples you will be running.
-    Master_mix_Loaded = False
-    current_tip_300 = 1
-    current_tip_20 = "B2"
+    Master_mix_Loaded = False  # Is the master mix loaded already? False or True
+    current_tip_300 = 1  # Where the P300 multi should start on tip box
+    current_tip_20 = "A1"  # Where the P20 single should start on tip box
 
 # Need to add a specification on what tip rack column to start on
 ############################################# Code that allows stuff to work ##########################################

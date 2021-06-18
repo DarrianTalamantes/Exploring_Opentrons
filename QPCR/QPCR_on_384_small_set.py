@@ -30,11 +30,11 @@ def run(protocol: protocol_api.ProtocolContext):
 ################################ Variable input below ######################################################
     # Sample information
     starting_sample = 1  # This is your current sample number. THe one the machine will start on
-    loaded_samples = 4  # This is how many samples you will be running.
-    Master_mix_Loaded = False
-    current_tip_300 = 1
-    current_tip_20 = "A1"
-
+    loaded_samples = 3  # This is how many samples you will be running. No more than 15 at a time!
+    Master_mix_Loaded = False  # Is the master mix loaded already? False or True
+    current_tip_300 = 1  # Where the P300 multi should start on tip box
+    current_tip_20 = "A1"  # Where the P20 single should start on tip box
+    MasterMix_Location = "D6"  # Location of master mix
 # Need to add a specification on what tip rack column to start on
 ############################################# Code that allows stuff to work ##########################################
     starting_sample -= 1  # This makes things start at 1 instead of 0
@@ -76,7 +76,7 @@ def run(protocol: protocol_api.ProtocolContext):
     if not Master_mix_Loaded:
         for s in range(0, loaded_samples):
             triplicate_samples = get_plate_positions(starting_sample2, alphabate)
-            left_pipette.distribute(12, reservoir.wells(0),
+            left_pipette.distribute(12, samples.wells_by_name()[MasterMix_Location],
                                     [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in triplicate_samples])
             starting_sample2 += 1
 
