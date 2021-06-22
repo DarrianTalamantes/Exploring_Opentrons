@@ -29,8 +29,8 @@ LABWARE_LABEL1 = LABWARE_DEF1.get('metadata', {}).get(
 def run(protocol: protocol_api.ProtocolContext):
 ################################ Variable input below ######################################################
     # Sample information
-    starting_sample = 5  # This is your current sample number. THe one the machine will start on
-    loaded_samples = 2  # This is how many samples you will be running. No more than 15 at a time!
+    starting_sample = 11  # This is your current sample number. THe one the machine will start on
+    loaded_samples = 3  # This is how many samples you will be running. No more than 15 at a time!
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True
     current_tip_300 = 1  # Where the P300 multi should start on tip box
     current_tip_20 = "A1"  # Where the P20 single should start on tip box
@@ -74,29 +74,39 @@ def run(protocol: protocol_api.ProtocolContext):
 # commands
     starting_sample2 = starting_sample
     if not Master_mix_Loaded:
+        left_pipette.pick_up_tip()
         for s in range(0, loaded_samples):
-            triplicate_samples = get_plate_positions(starting_sample2, alphabate)
+            single_position = get_plate_positions(starting_sample2, alphabate)
             left_pipette.distribute(12, samples.wells_by_name()[MasterMix_Location],
-                                    [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in triplicate_samples])
+                                    [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in single_position], new_tip='never')
             starting_sample2 += 1
+    left_pipette.drop_tip()
 
     for s in range(0, loaded_samples):
-        triplicate_samples = get_plate_positions(starting_sample, alphabate)
+        single_position = get_plate_positions(starting_sample, alphabate)
         sample_pickup = get_sample_positions(s, sample_array)
 
         left_pipette.distribute(2, samples.wells_by_name()[sample_pickup],
-                                [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in triplicate_samples])
+                                [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in single_position])
         starting_sample += 1
 
 
 ######################################## methods to be used in protocol ############################################
 
 def get_plate_positions(current_sample, alphabate):
-    where_to_plate = np.zeros(3, dtype='U25')
-    start_num = current_sample * 3 % 24
-    start_letter_finder = current_sample * 3 // 24
+    where_to_plate = np.zeros(1, dtype='U25')
+    if current_sample == 0:
+        start_num = 0
+    elif (current_sample % 2) == 0:
+        print("even")
+        start_num = (current_sample*2) % 24
+
+    else:
+        print("odd")
+        start_num = (current_sample*2) % 24
+    start_letter_finder = current_sample*2 // 24
     start_letter = alphabate[start_letter_finder]
-    for x in range(0, 3):
+    for x in range(0, 1):
         where_to_plate[x] = start_letter + str(start_num + 1)
         start_num += 1
     return where_to_plate
