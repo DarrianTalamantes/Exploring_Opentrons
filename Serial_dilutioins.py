@@ -3,7 +3,6 @@ import math
 import json
 import numpy as np
 
-
 # metadata
 metadata = {
     'protocolName': 'Single Channel Example',
@@ -26,11 +25,17 @@ LABWARE_DEF1 = json.loads(LABWARE_DEF_JSON1)
 LABWARE_LABEL1 = LABWARE_DEF1.get('metadata', {}).get(
     'displayName', 'test labware')
 
+
 def run(protocol: protocol_api.ProtocolContext):
-    # variables
-    current_tip_20 = "A2"  # Where the P20 single should start on tip box
+    ######################  variables #############################
+    current_tip_20 = "A1"  # Where the P20 single should start on tip box
     MasterMix_Location = "0"
-    Blue_sample = "A1"
+    Blue_sample = "A1"  # Where the thing you are diluting is
+
+    # location of first tube in your dilutions.
+    starting_row = 4
+    starting_col = 1
+    dilutions = 5  # the amount of tubes used for dilutions
 
     ################ labware #############################################################
     tiprack_20 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_loc)
@@ -45,9 +50,14 @@ def run(protocol: protocol_api.ProtocolContext):
 
     ################################ pipettes set up ####################################################
     left_pipette = protocol.load_instrument('p20_single_gen2', 'left', tip_racks=[tiprack_20])
-     # Set starting tip
+    # Set starting tip
     left_pipette.starting_tip = tiprack_20.wells_by_name()[current_tip_20]
-
+    ################################ Creation of special arrays #######################################
+    tube_rack_array = np.zeros((4, 6), dtype='U25')
+    alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+    for col in range(0, 6):
+        for row in range(0, 4):
+            tube_rack_array[row, col] = alphabate[row] + str(col + 1)
 
     ####################################### Commands #############################
 
@@ -55,7 +65,7 @@ def run(protocol: protocol_api.ProtocolContext):
     # left_pipette.transfer(10, reservoir_1.wells(0), tube_rack_1.wells_by_name()['A3'])
 
     # Caitlin Serial Dilution
-    left_pipette.pick_up_tip() #default is trash, set to never to keep same tip for water
+    left_pipette.pick_up_tip()  # default is trash, set to never to keep same tip for water
     left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D1'], new_tip='never')
     left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D2'], new_tip='never')
     left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D3'], new_tip='never')
@@ -63,48 +73,44 @@ def run(protocol: protocol_api.ProtocolContext):
     left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D5'], new_tip='never')
     left_pipette.drop_tip()
 
+    # left_pipette.pick_up_tip()
+    # left_pipette.transfer(2, tube_rack_1.wells_by_name()[Blue_sample], tube_rack_1.wells_by_name()['D1'],
+    #                       new_tip='never', blow_out=True, blowout_location='destination well', mix_after=(5, 5))
+    # left_pipette.transfer(2, tube_rack_1.wells_by_name()['D1'], tube_rack_1.wells_by_name()['D2'], new_tip='never',
+    #                       blow_out=True, blowout_location='destination well', mix_after=(5, 5)),
+    # left_pipette.transfer(2, tube_rack_1.wells_by_name()['D2'], tube_rack_1.wells_by_name()['D3'], new_tip='never',
+    #                       blow_out=True, blowout_location='destination well', mix_after=(5, 5))
+    # left_pipette.transfer(2, tube_rack_1.wells_by_name()['D3'], tube_rack_1.wells_by_name()['D4'], new_tip='never',
+    #                       blow_out=True, blowout_location='destination well', mix_after=(5, 5))
+    # left_pipette.transfer(2, tube_rack_1.wells_by_name()['D4'], tube_rack_1.wells_by_name()['D5'], new_tip='never',
+    #                       blow_out=True, blowout_location='destination well', mix_after=(5, 5))
+    # left_pipette.drop_tip()
+
+    # Roys serial dilution
+    current_row = starting_row - 1
+    current_col = starting_col - 1
+    dilutions = dilutions - 1
     left_pipette.pick_up_tip()
-    left_pipette.transfer(2, tube_rack_1.wells_by_name()[Blue_sample], tube_rack_1.wells_by_name()['D1'], new_tip='never', blow_out=True, blowout_location='source well', mix_after=(5, 5))
-    left_pipette.transfer(2, tube_rack_1.wells_by_name()['D1'], tube_rack_1.wells_by_name()['D2'], new_tip='never', blow_out=True, blowout_location='source well', mix_after=(5, 5)),
-    left_pipette.transfer(2, tube_rack_1.wells_by_name()['D2'], tube_rack_1.wells_by_name()['D3'], new_tip='never', blow_out=True, blowout_location='source well', mix_after=(5, 5))
-    left_pipette.transfer(2, tube_rack_1.wells_by_name()['D3'], tube_rack_1.wells_by_name()['D4'], new_tip='never', blow_out=True, blowout_location='source well', mix_after=(5, 5))
-    left_pipette.transfer(2, tube_rack_1.wells_by_name()['D4'], tube_rack_1.wells_by_name()['D5'], new_tip='never', blow_out=True, blowout_location='source well', mix_after=(5, 5))
+    left_pipette.transfer(2, tube_rack_1.wells_by_name()[Blue_sample],
+                          tube_rack_1.wells_by_name()[tube_rack_array[current_row, current_col]],
+                          new_tip='never', blow_out=True, blowout_location='destination well', mix_after=(5, 5))
+    for i in range(0, dilutions):
+        current_col, current_row = check_col(current_col, current_row)
+        pos1 = tube_rack_array[current_row, current_col]
+        current_col = current_col + 1
+        current_col, current_row = check_col(current_col, current_row)
+        pos2 = tube_rack_array[current_row, current_col]
+
+        left_pipette.transfer(2, tube_rack_1.wells_by_name()[pos1], tube_rack_1.wells_by_name()[pos2],
+                              new_tip='never', blow_out=True, blowout_location='destination well', mix_after=(5, 5))
     left_pipette.drop_tip()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def check_col(current_col, current_row):
+    if current_col == 6:
+        current_col = 0
+        current_row = current_row + 1
+    return current_col, current_row
 #
 # # variables
 # # Variable Examples
