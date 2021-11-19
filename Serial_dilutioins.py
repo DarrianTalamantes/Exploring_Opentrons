@@ -27,10 +27,14 @@ LABWARE_LABEL1 = LABWARE_DEF1.get('metadata', {}).get(
 
 
 def run(protocol: protocol_api.ProtocolContext):
-    ######################  variables #############################
+    #######################################  Variables ########################################################
+    #######################################  Variables ########################################################
     current_tip_20 = "A1"  # Where the P20 single should start on tip box
-    MasterMix_Location = "0"
     Blue_sample = "A1"  # Where the thing you are diluting is
+
+    #  Water location
+    water_location = 12
+    water_uptake = 18
 
     # location of first tube in your dilutions.
     starting_row = 4
@@ -53,25 +57,72 @@ def run(protocol: protocol_api.ProtocolContext):
     # Set starting tip
     left_pipette.starting_tip = tiprack_20.wells_by_name()[current_tip_20]
     ################################ Creation of special arrays #######################################
-    tube_rack_array = np.zeros((4, 6), dtype='U25')
+    tube_rack_array = np.zeros((4, 6), dtype='U25')  # creates array of zeroes of 4 rows and 6 columns (grid)
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
     for col in range(0, 6):
         for row in range(0, 4):
             tube_rack_array[row, col] = alphabate[row] + str(col + 1)
 
     ####################################### Commands #############################
+    # Darrian serial dilution
 
-    # Transfer from res 1 to tube rack C1
+    # This starts variables at 0
+    water_location = water_location - 1
+    current_row = starting_row - 1
+    current_col = starting_col - 1
+
+    # These next lines transfer water to the tubes
+    left_pipette.pick_up_tip()
+    for i in range(0, dilutions):
+        current_col, current_row = check_col(current_col, current_row)  # This uses the method called check_col
+        pos1 = tube_rack_array[
+            current_row, current_col]  # calls a position of the tube rack array and sets it equal to pos1
+        current_col = current_col + 1
+        left_pipette.transfer(water_uptake, reservoir_1.wells(water_location), tube_rack_1.wells_by_name()[pos1],
+                              new_tip='never')
+    left_pipette.drop_tip()
+
+    # This starts varaibles at 0
+    current_row = starting_row - 1
+    current_col = starting_col - 1
+    dilutions = dilutions - 1
+
+    # These next lines pick up from the blue tube and serial dilute
+    left_pipette.pick_up_tip()
+    left_pipette.transfer(2, tube_rack_1.wells_by_name()[Blue_sample],
+                          tube_rack_1.wells_by_name()[tube_rack_array[current_row, current_col]],
+                          new_tip='never', blow_out=True, blowout_location='destination well',
+                          mix_after=(5, 10))  # mix 5 times 10 ul
+    for i in range(0, dilutions):
+        current_col, current_row = check_col(current_col, current_row)  # This uses the method called check_col
+        pos1 = tube_rack_array[current_row, current_col]
+        current_col = current_col + 1
+        current_col, current_row = check_col(current_col, current_row)
+        pos2 = tube_rack_array[current_row, current_col]
+
+        left_pipette.transfer(2, tube_rack_1.wells_by_name()[pos1], tube_rack_1.wells_by_name()[pos2],
+                              new_tip='never', blow_out=True, blowout_location='destination well', mix_after=(5, 10))
+    left_pipette.drop_tip()
+
+
+def check_col(current_col, current_row):  # This checks if col is >6 and sets it to 1
+    if current_col == 6:
+        current_col = 0
+        current_row = current_row + 1
+    return current_col, current_row
+
+    #  Example of a transfere command this moves 10 ul from res to tube rack
     # left_pipette.transfer(10, reservoir_1.wells(0), tube_rack_1.wells_by_name()['A3'])
 
-    # Caitlin Serial Dilution
-    left_pipette.pick_up_tip()  # default is trash, set to never to keep same tip for water
-    left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D1'], new_tip='never')
-    left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D2'], new_tip='never')
-    left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D3'], new_tip='never')
-    left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D4'], new_tip='never')
-    left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D5'], new_tip='never')
-    left_pipette.drop_tip()
+    # Caitlin Serial Dilution : This dilution does the same thing as the loops above
+    # This next set of lines puts water into tubes
+    # left_pipette.pick_up_tip()  # default is trash, set to never to keep same tip for water
+    # left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D1'], new_tip='never')
+    # left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D2'], new_tip='never')
+    # left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D3'], new_tip='never')
+    # left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D4'], new_tip='never')
+    # left_pipette.transfer(18, reservoir_1.wells(11), tube_rack_1.wells_by_name()['D5'], new_tip='never')
+    # left_pipette.drop_tip()
 
     # left_pipette.pick_up_tip()
     # left_pipette.transfer(2, tube_rack_1.wells_by_name()[Blue_sample], tube_rack_1.wells_by_name()['D1'],
@@ -86,31 +137,6 @@ def run(protocol: protocol_api.ProtocolContext):
     #                       blow_out=True, blowout_location='destination well', mix_after=(5, 5))
     # left_pipette.drop_tip()
 
-    # Roys serial dilution
-    current_row = starting_row - 1
-    current_col = starting_col - 1
-    dilutions = dilutions - 1
-    left_pipette.pick_up_tip()
-    left_pipette.transfer(2, tube_rack_1.wells_by_name()[Blue_sample],
-                          tube_rack_1.wells_by_name()[tube_rack_array[current_row, current_col]],
-                          new_tip='never', blow_out=True, blowout_location='destination well', mix_after=(5, 5))
-    for i in range(0, dilutions):
-        current_col, current_row = check_col(current_col, current_row)
-        pos1 = tube_rack_array[current_row, current_col]
-        current_col = current_col + 1
-        current_col, current_row = check_col(current_col, current_row)
-        pos2 = tube_rack_array[current_row, current_col]
-
-        left_pipette.transfer(2, tube_rack_1.wells_by_name()[pos1], tube_rack_1.wells_by_name()[pos2],
-                              new_tip='never', blow_out=True, blowout_location='destination well', mix_after=(5, 5))
-    left_pipette.drop_tip()
-
-
-def check_col(current_col, current_row):
-    if current_col == 6:
-        current_col = 0
-        current_row = current_row + 1
-    return current_col, current_row
 #
 # # variables
 # # Variable Examples

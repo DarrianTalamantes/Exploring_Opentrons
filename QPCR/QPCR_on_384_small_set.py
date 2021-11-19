@@ -47,18 +47,14 @@ def run(protocol: protocol_api.ProtocolContext):
             plate_array[row, col] = alphabate[row] + str(col + 1)
     print(plate_array)
     # Creating an array for the sample plate
-    sample_array = np.zeros((4, 4), dtype='U25')
-    col2 = 0
-    for col in range(0, 4):
-        col2 += 1
-        if col2 == 3:
-            col2 += 2
-        for row in range(0, 4):
-            sample_array[row, col] = alphabate[row] + str(col2)
+    tube_rack_array = np.zeros((4, 6), dtype='U25')
+    for col1 in range(0, 6):
+        for row1 in range(0, 4):
+            tube_rack_array[row1, col1] = alphabate[row1] + str(col1 + 1)
 
     # labware
     tiprack_20 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_loc)
-    samples = protocol.load_labware('opentrons_24_aluminumblock_nest_1.5ml_snapcap', sample_loc)
+    samples1 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', sample_loc)
     sorenson_384_wellplate_30ul = protocol.load_labware_from_definition(
         LABWARE_DEF1,
         sorenson384_loc,
@@ -76,15 +72,15 @@ def run(protocol: protocol_api.ProtocolContext):
     if not Master_mix_Loaded:
         for s in range(0, loaded_samples):
             triplicate_samples = get_plate_positions(starting_sample2, alphabate)
-            left_pipette.distribute(12, samples.wells_by_name()[MasterMix_Location],
+            left_pipette.distribute(12, samples1.wells_by_name()[MasterMix_Location],
                                     [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in triplicate_samples])
             starting_sample2 += 1
 
     for s in range(0, loaded_samples):
         triplicate_samples = get_plate_positions(starting_sample, alphabate)
-        sample_pickup = get_sample_positions(s, sample_array)
+        sample_pickup = get_sample_positions(s, tube_rack_array)
 
-        left_pipette.distribute(2, samples.wells_by_name()[sample_pickup],
+        left_pipette.distribute(2, samples1.wells_by_name()[sample_pickup],
                                 [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in triplicate_samples])
         starting_sample += 1
 
