@@ -31,11 +31,11 @@ LABWARE_LABEL1 = LABWARE_DEF1.get('metadata', {}).get(
 def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
     # Sample information
-    starting_sample = 9  # This is your current sample number. The one the machine will start on
-    loaded_samples = 8  # This is how many samples you will be running. No more than 48 at a time! Always starts at sample rack1 A1
-    master_mix_loaded = True  # Is the master mix loaded already? False or True
+    starting_sample = 11  # This is your current sample number. The one the machine will start on
+    loaded_samples = 10  # This is how many samples you will be running. No more than 48 at a time! Always starts at sample rack1 A1
+    master_mix_loaded = False  # Is the master mix loaded already? False or True
     current_tip_300 = 1  # Where the P300 multi should start on tip box
-    current_tip_20 = "A4"  # Where the P20 single should start on tip box
+    current_tip_20 = "E6"  # Where the P20 single should start on tip box
     master_mix_location = "A1"  # Location of master mix on tube_rack2
 
     # Need to add a specification on what tip rack column to start on
