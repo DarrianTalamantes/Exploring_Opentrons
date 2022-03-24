@@ -1,7 +1,7 @@
 def get_values(*names):
     import json
     _all_values = json.loads(
-        """{"num_samples":8,"include_dnase":false,"deepwell_type":"nest_96_wellplate_2ml_deep","res_type":"nest_12_reservoir_15ml","starting_vol":400,"binding_buffer_vol":430,"wash1_vol":500,"wash2_vol":500,"wash3_vol":500,"elution_vol":50,"mix_reps":15,"settling_time":1,"park_tips":false,"tip_track":false,"flash":false,"include_bind":false,"include_wash1":false,"include_wash2":false,"include_wash3":true,"include_wash4":false,"include_dry":false,"include_elute":true}""")
+        """{"num_samples":8,"include_dnase":false,"deepwell_type":"nest_96_wellplate_2ml_deep","res_type":"nest_12_reservoir_15ml","starting_vol":400,"binding_buffer_vol":430,"wash1_vol":500,"wash2_vol":500,"wash3_vol":500,"elution_vol":50,"mix_reps":15,"settling_time":5,"park_tips":false,"tip_track":false,"flash":false,"include_bind":true,"include_wash1":true,"include_wash2":true,"include_wash3":true,"include_wash4":true,"include_dry":true,"include_elute":true}""")
     return [_all_values[n] for n in names]
 
 
@@ -238,7 +238,7 @@ resuming.')
             else:
                 _pick_up(m300)
             side = -1 if i % 2 == 0 else 1
-            loc = m.bottom(0.2).move(Point(x=side * 2))
+            loc = m.bottom(0.5).move(Point(x=side * 2))
             for _ in range(num_trans):
                 _waste_track(vol_per_trans)
                 if m300.current_volume > 0:
@@ -498,7 +498,7 @@ resuming.')
         for i, (m, spot) in enumerate(zip(mag_samples_m, parking_spots)):
             _pick_up(m300)
             side = 1 if i % 2 == 0 else -1
-            loc = m.bottom(0.2).move(Point(x=side * 2))
+            loc = m.bottom().move(Point(x=side * 2))
             m300.aspirate(vol, elution_solution)
             m300.move_to(m.center())
             m300.dispense(vol, loc)
