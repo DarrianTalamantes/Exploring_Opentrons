@@ -33,9 +33,9 @@ def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
     # Sample information
     starting_sample = 1  # This is your current sample number. The one the machine will start on
-    loaded_samples = 2  # This is how many samples you will be running. No more than 48 at a time! Always starts at sample rack1 A1
+    loaded_samples = 40  # This is how many samples you will be running. No more than 48 at a time! Always starts at sample rack1 A1
     master_mix_loaded = False  # Is the master mix loaded already? False or True
-    current_tip_20 = "A1"  # Where the P20 single should start on tip box
+    current_tip_20 = "D3"  # Where the P20 single should start on tip box
     master_mix_location = "A1"  # Location of master mix on tube_rack2
 
     # Need to add a specification on what tip rack column to start on
@@ -57,7 +57,8 @@ def run(protocol: protocol_api.ProtocolContext):
     # labware
     tiprack_20 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_loc)
     tube_rack1 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack1_loc)
-    tube_rack2 = protocol.load_labware('opentrons_15_tuberack_nest_15ml_conical', tube_rack2_loc)
+    tube_rack2 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack2_loc)
+    # tube_rack2 = protocol.load_labware('opentrons_15_tuberack_nest_15ml_conical', tube_rack2_loc)
     tube_rack3 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack3_loc)
     tube_rack4 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack4_loc)
     tube_rack5 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack5_loc)
