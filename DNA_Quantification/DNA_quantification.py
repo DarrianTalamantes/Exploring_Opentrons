@@ -30,17 +30,17 @@ reservoir_15ml_loc = 6
 def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
     # Sample information
-    loaded_samples = 96  # This is your current sample number. THe one the machine will start on
-    Master_mix_well = 1  # This is the area where your master mix is located
+    loaded_samples = 96  # This is the amount of samples loaded into the machine
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True
-    current_tip_200 = 2  # Where the P300 multi should start on tip box
-    current_tip_20 = "A1"  # Must start on tip_rack_20ul_1
+    current_tip_200 = 2  # Where the P300 multi should start on tip box  *** This is the thing youll usually change***
+    master_mix_loc = 1  # what well is the mastermix in?
+    current_tip_20 = "A1"  # Where the 20 ul pipette starts on tips
 
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
     # This makes things start at 1 instead of 0
     current_tip_200 -= 1
-    Master_mix_well -= 1
+    master_mix_loc -= 1
     # labware
 
     black_plate = protocol.load_labware('corning_96_wellplate_360ul_flat', black_plate_loc)
@@ -66,19 +66,21 @@ def run(protocol: protocol_api.ProtocolContext):
     for col1 in range(0, 6):
         for row1 in range(0, 4):
             tube_rack_array[row1, col1] = alphabate[row1] + str(col1 + 1)
-
+    # Making an array for the 96 well plate
     well_96_array = np.zeros((8, 12), dtype='U25')
     for col1 in range(0, 12):
         for row1 in range(0, 8):
             well_96_array[row1, col1] = alphabate[row1] + str(col1 + 1)
+    # setting master mix in correct spot
+    master_mix_well = reservoir_15ml.wells()[master_mix_loc]
 
     # commands
-    # if not Master_mix_Loaded:
-    #     right_pipette.pick_up_tip()
-    #     for i in range(0, 12):
-    #         right_pipette.transfer(95, reservoir_15ml.wells()[Master_mix_well], black_plate.columns(i),
-    #                                new_tip='never', airgap=5, rate=2.0)
-    #     right_pipette.drop_tip()
+    if not Master_mix_Loaded:
+        right_pipette.pick_up_tip()
+        for i in range(0, 12):
+            right_pipette.transfer(95, master_mix_well, black_plate.columns(i),
+                                   new_tip='never', airgap=5, rate=2.0)
+        right_pipette.drop_tip()
 
     for s in range(0, loaded_samples):
         sample_pickup = get_sample_positions(s, tube_rack_array)
@@ -86,19 +88,19 @@ def run(protocol: protocol_api.ProtocolContext):
         if (s > 71) & (s <= 95):
             left_pipette.transfer(5, tube_rack_4.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  airgap=5, rate=2.0)
+                                  air_gap=5, rate=2.0)
         if (s > 47) & (s <= 71):
             left_pipette.transfer(5, tube_rack_3.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  airgap=5, rate=2.0)
+                                  air_gap=5, rate=2.0)
         if (s > 23) & (s <= 47):
             left_pipette.transfer(5, tube_rack_2.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  airgap=5, rate=2.0)
+                                  air_gap=5, rate=2.0)
         if (s >= 0) & (s <= 23):
             left_pipette.transfer(5, tube_rack_1.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  airgap=5, rate=2.0)
+                                  air_gap=5, rate=2.0)
 
 
 ######################################## methods to be used in protocol ############################################

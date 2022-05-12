@@ -5,15 +5,17 @@ import numpy as np
 
 # metadata
 metadata = {
-    'protocolName': '24 sample QPCR',
+    'protocolName': '1-94 sample QPCR',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
-    'description': 'A protocol to do a 24 sample QPCR in a 384 plate',
+    'description': 'A protocol that will carry out qpcr in tiplicate skipping the first and last row, first column '
+                   'and last 2 columns', 
     'apiLevel': '2.9'
 }
 
 # Here you input location of labware
 sorenson384_loc = 3  # This is your 384 plate
 tip_rack_20_loc = 8
+tip_rack_20_2_loc = 9
 tube_rack1_loc = 1  # first 24 samples go here
 tube_rack2_loc = 2  # master mix and
 tube_rack3_loc = 5  # 2nd 24 samples go here
@@ -33,9 +35,10 @@ def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
     # Sample information
     starting_sample = 1  # This is your current sample number. The one the machine will start on
-    loaded_samples = 40  # This is how many samples you will be running. No more than 48 at a time! Always starts at sample rack1 A1
+    # I suggest doing no more than 95 samples. That will be enough for exactly one tip box. Max is 96
+    loaded_samples = 94  # This is how many samples you will be running. Always starts at sample rack1 A1
     master_mix_loaded = False  # Is the master mix loaded already? False or True
-    current_tip_20 = "D3"  # Where the P20 single should start on tip box
+    current_tip_20 = "A1"  # Where the P20 single should start on tip box. Always starts on location 8.
     master_mix_location = "A1"  # Location of master mix on tube_rack2
 
     # Need to add a specification on what tip rack column to start on
@@ -56,9 +59,10 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # labware
     tiprack_20 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_loc)
+    tiprack_20_2 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_2_loc)
     tube_rack1 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack1_loc)
     tube_rack2 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack2_loc)
-    # tube_rack2 = protocol.load_labware('opentrons_15_tuberack_nest_15ml_conical', tube_rack2_loc)
+    # tube_rack2 = protocol.load_labware('opentrons_15_tuberack_nest_15ml_conical', tube_rack2_loc) # For lots of master mix
     tube_rack3 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack3_loc)
     tube_rack4 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack4_loc)
     tube_rack5 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack5_loc)
@@ -71,7 +75,7 @@ def run(protocol: protocol_api.ProtocolContext):
     )
 
     # pipettes
-    left_pipette = protocol.load_instrument('p20_single_gen2', 'left', tip_racks=[tiprack_20])
+    left_pipette = protocol.load_instrument('p20_single_gen2', 'left', tip_racks=[tiprack_20, tiprack_20_2])
     # Set starting tip
     left_pipette.starting_tip = tiprack_20.wells_by_name()[current_tip_20]
 
@@ -107,7 +111,7 @@ def run(protocol: protocol_api.ProtocolContext):
             left_pipette.distribute(5, tube_rack3.wells_by_name()[sample_pickup],
                                     [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
                                      triplicate_samples], blow_out=True, air_gap=5)
-        else:
+        if (tube >= 1) & (s <= 24):
             left_pipette.distribute(5, tube_rack1.wells_by_name()[sample_pickup],
                                 [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
                                  triplicate_samples], blow_out=True, air_gap=5)
