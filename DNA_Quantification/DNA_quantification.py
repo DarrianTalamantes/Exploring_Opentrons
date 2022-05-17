@@ -79,7 +79,7 @@ def run(protocol: protocol_api.ProtocolContext):
         right_pipette.pick_up_tip()
         for i in range(0, 12):
             right_pipette.transfer(95, master_mix_well, black_plate.columns(i),
-                                   new_tip='never', airgap=5, rate=2.0)
+                                   new_tip='never', air_gap=5)
         right_pipette.drop_tip()
 
     for s in range(0, loaded_samples):
@@ -88,19 +88,19 @@ def run(protocol: protocol_api.ProtocolContext):
         if (s > 71) & (s <= 95):
             left_pipette.transfer(5, tube_rack_4.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5, rate=2.0)
+                                  air_gap=5)
         if (s > 47) & (s <= 71):
             left_pipette.transfer(5, tube_rack_3.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5, rate=2.0)
+                                  air_gap=5)
         if (s > 23) & (s <= 47):
             left_pipette.transfer(5, tube_rack_2.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5, rate=2.0)
+                                  air_gap=5)
         if (s >= 0) & (s <= 23):
             left_pipette.transfer(5, tube_rack_1.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5, rate=2.0)
+                                  air_gap=5)
 
 
 ######################################## methods to be used in protocol ############################################

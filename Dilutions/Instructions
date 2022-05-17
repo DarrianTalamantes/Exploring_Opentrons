@@ -1,0 +1,15 @@
+First 24 samples go in position 10 starting at A1 then traveling to A6 and from A6 it will go to B1. 
+Second 24 samples go in position 7
+Third 24 samples go in position 4
+Forth 24 samples go in position 1
+
+First set of dilutions go in position 11, second set 8, third set 5, forth set 2.
+The dilution positions are the same as the sample positions just moved over to the next rack.
+
+Step 1: Create a one column csv file of all the concentrations in the order they will be placed in. The row number of this file tells the machine how many samples are present
+Step 2: copy the data from this file and paste it directly below this line  " csv_raw = '''  "
+Step 3: place 5ml of water in a 15ml conical tube on location 3 A1
+Step 4: load samples
+Step 5: Set this variable equal to your target concentration in ng/ul "target_con" (default is 10)
+Step 6: Run protocol
+Step 7: Close samples and dilutions. Vortex dilutions before next use.
