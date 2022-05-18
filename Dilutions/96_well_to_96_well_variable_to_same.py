@@ -66,18 +66,11 @@ csv_data = csv_raw.splitlines()[1:]
 concentrations = np.array(csv_data, dtype=float)
 
 # Here you input location of labware
-tip_rack_20_loc = 9  # tip rack for p20 single channel
+tip_rack_20_loc = 4  # tip rack for p20 single channel
 tip_rack_300_loc = 6  # tip rack for p300 single channel
 tube_rack_15ml_loc = 3  # tube rack 15ml with water in A1
-tube_rack1_loc = 10  # first set of samples goes here
-tube_rack2_loc = 11  # first set of dilutions will be here
-tube_rack3_loc = 7  # second set of samples will be here
-tube_rack4_loc = 8  # second set of dilutions goes here
-tube_rack5_loc = 4  # third set of samples goes here
-tube_rack6_loc = 5  # third set of dilutions will be here
-tube_rack7_loc = 1  # forth set of samples goes here
-tube_rack8_loc = 2  # forth set of dilutions will be here
-
+sample_plate_loc = 1
+dilution_plate_loc = 2
 
 # Here I am putting in the custom labware
 
@@ -96,23 +89,19 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # # Creating an array for the sample plate
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-    tube_rack_array = np.zeros((4, 6), dtype='U25')
-    for col1 in range(0, 6):
-        for row1 in range(0, 4):
-            tube_rack_array[row1, col1] = alphabate[row1] + str(col1 + 1)
+
+    well_96_array = np.zeros((8, 12), dtype='U25')
+    for col1 in range(0, 12):
+        for row1 in range(0, 8):
+            well_96_array[row1, col1] = alphabate[row1] + str(col1 + 1)
 
     # #  labware
     tiprack_20 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_loc)
     tip_rack_300 = protocol.load_labware('opentrons_96_tiprack_300ul', tip_rack_300_loc)
     tube_rack_15ml = protocol.load_labware('opentrons_15_tuberack_falcon_15ml_conical', tube_rack_15ml_loc)
-    tube_rack1 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack1_loc)
-    tube_rack2 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack2_loc)
-    tube_rack3 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack3_loc)
-    tube_rack4 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack4_loc)
-    tube_rack5 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack5_loc)
-    tube_rack6 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack6_loc)
-    tube_rack7 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack7_loc)
-    tube_rack8 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack8_loc)
+    sample_plate = protocol.load_labware('corning_96_wellplate_360ul_flat', sample_plate_loc)
+    dilution_plate = protocol.load_labware('opentrons_96_aluminumblock_biorad_wellplate_200ul', dilution_plate_loc)
+
 
     # #  pipettes
     left_pipette = protocol.load_instrument('p20_single_gen2', 'left', tip_racks=[tiprack_20])
@@ -128,46 +117,23 @@ def run(protocol: protocol_api.ProtocolContext):
     # # formatting data better
     aspirations = set_up_data(concentrations, target_con)
 
-    # commands
+    ############################################## commands #########################################################
 
     # Loading water
     if not water_loaded:
         right_pipette.pick_up_tip()
         for i in range(0, len(aspirations)):
-            water_drop = get_tube_positions(i, tube_rack_array)
-            if (i > 71) & (i <= 95):
-                right_pipette.transfer(aspirations[2][i], water_well, tube_rack8.wells_by_name()[water_drop],
-                                       new_tip='never', air_gap=5)
-            if (i > 47) & (i <= 71):
-                right_pipette.transfer(aspirations[2][i], water_well, tube_rack6.wells_by_name()[water_drop],
-                                       new_tip='never', air_gap=5)
-            if (i > 23) & (i <= 47):
-                right_pipette.transfer(aspirations[2][i], water_well, tube_rack4.wells_by_name()[water_drop],
-                                       new_tip='never', air_gap=5)
-            if (i >= 0) & (i <= 23):
-                right_pipette.transfer(aspirations[2][i], water_well, tube_rack2.wells_by_name()[water_drop],
-                                       new_tip='never', air_gap=5)
+            water_drop = get_plate_positions(i, well_96_array)
+            right_pipette.transfer(aspirations[2][i], water_well, dilution_plate.wells_by_name()[water_drop],
+                                   new_tip='never', air_gap=5)
         right_pipette.drop_tip()
 
     # adding sample to water
     for i in range(0, len(aspirations)):
-        tube_position = get_tube_positions(i, tube_rack_array)
-        if (i > 71) & (i <= 95):
-            left_pipette.transfer(aspirations[1][i], tube_rack7.wells_by_name()[tube_position],
-                                  tube_rack8.wells_by_name()[tube_position],
-                                  air_gap=3, rate=2.0)
-        if (i > 47) & (i <= 71):
-            left_pipette.transfer(aspirations[1][i], tube_rack5.wells_by_name()[tube_position],
-                                  tube_rack6.wells_by_name()[tube_position],
-                                  air_gap=3, rate=2.0)
-        if (i > 23) & (i <= 47):
-            left_pipette.transfer(aspirations[1][i], tube_rack3.wells_by_name()[tube_position],
-                                  tube_rack4.wells_by_name()[tube_position],
-                                  air_gap=3, rate=2.0)
-        if (i >= 0) & (i <= 23):
-            left_pipette.transfer(aspirations[1][i], tube_rack1.wells_by_name()[tube_position],
-                                  tube_rack2.wells_by_name()[tube_position],
-                                  air_gap=3, rate=2.0)
+        location = get_plate_positions(i, well_96_array)
+        left_pipette.transfer(aspirations[1][i], sample_plate.wells_by_name()[location],
+                              dilution_plate.wells_by_name()[location],
+                              air_gap=3, mix_after=(5, 18))
 
 
 ######################################## methods to be used in protocol ############################################
@@ -196,12 +162,12 @@ def set_up_data(concentrations, target_con):
     return big_data
 
 
-def get_tube_positions(position, sample_array):
-    row = position % 6
-    col = position // 6
-    if col >= 8:
-        col -= 8
-    if col >= 4:
-        col -= 4
-    grab_this = sample_array[col][row]
+def get_plate_positions(current_sample, well_96_array):
+    if current_sample >= 96:
+        plate_num = current_sample // 96
+        subtracted = plate_num * 96
+        current_sample = current_sample - subtracted
+    col = current_sample % 12
+    row = current_sample // 12
+    grab_this = well_96_array[row][col]
     return (grab_this)
