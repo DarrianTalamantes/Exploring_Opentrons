@@ -15,52 +15,54 @@ metadata = {
 }
 # Input CSV
 csv_raw = '''
-125
-83
-65
-111
-45
-53
-50
-73
 100
-101
-120
+110
+90
+80
 75
-35
-62
-45
-125
-83
-65
-111
-45
-53
-50
-73
+80
 100
-101
-120
+110
+100
+100
+100
+110
+90
+80
 75
-35
-62
-45
-125
-83
-65
-111
-45
-53
-50
-73
+80
 100
-101
-120
+110
+100
+100
+100
+110
+90
+80
 75
-35
-62
-45
+80
 100
+110
+100
+100
+100
+110
+90
+80
+75
+80
+100
+110
+100
+100
+100
+110
+90
+80
+75
+80
+100
+110
 '''
 csv_data = csv_raw.splitlines()[1:]
 concentrations = np.array(csv_data, dtype=float)
@@ -82,7 +84,8 @@ def run(protocol: protocol_api.ProtocolContext):
     target_con = 10  # This is the final concentration we are diluting to
     current_tip_20 = "B1"  # Where the P20 single should start on tip box.
     current_tip_300 = "B1"  # Where the p300 single should start on the tip box
-    water_location = "A1"  # Location of master mix on tube_rack2
+    water_location = "A1"  # Location of water on tube_rack2
+    water_location2 = "A2"  # Location of second water on tube_rack2
     water_loaded = False  # if you have already loaded the water for some reason this turns to True
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
@@ -100,7 +103,7 @@ def run(protocol: protocol_api.ProtocolContext):
     tip_rack_300 = protocol.load_labware('opentrons_96_tiprack_300ul', tip_rack_300_loc)
     tube_rack_15ml = protocol.load_labware('opentrons_15_tuberack_falcon_15ml_conical', tube_rack_15ml_loc)
     sample_plate = protocol.load_labware('corning_96_wellplate_360ul_flat', sample_plate_loc)
-    dilution_plate = protocol.load_labware('opentrons_96_aluminumblock_biorad_wellplate_200ul', dilution_plate_loc)
+    dilution_plate = protocol.load_labware('opentrons_96_aluminumblock_generic_pcr_strip_200ul', dilution_plate_loc)
 
 
     # #  pipettes
@@ -120,12 +123,16 @@ def run(protocol: protocol_api.ProtocolContext):
     ############################################## commands #########################################################
 
     # Loading water
+    water_amount = 5000
     if not water_loaded:
         right_pipette.pick_up_tip()
         for i in range(0, len(aspirations)):
             water_drop = get_plate_positions(i, well_96_array)
             right_pipette.transfer(aspirations[2][i], water_well, dilution_plate.wells_by_name()[water_drop],
-                                   new_tip='never', air_gap=5)
+                                   new_tip='never', air_gap=10)
+            water_amount -= aspirations[2][i]
+            if water_amount <= 200:
+                water_well = tube_rack_15ml.wells_by_name()[water_location2]
         right_pipette.drop_tip()
 
     # adding sample to water
@@ -133,7 +140,7 @@ def run(protocol: protocol_api.ProtocolContext):
         location = get_plate_positions(i, well_96_array)
         left_pipette.transfer(aspirations[1][i], sample_plate.wells_by_name()[location],
                               dilution_plate.wells_by_name()[location],
-                              air_gap=3, mix_after=(5, 18))
+                              air_gap=3)
 
 
 ######################################## methods to be used in protocol ############################################

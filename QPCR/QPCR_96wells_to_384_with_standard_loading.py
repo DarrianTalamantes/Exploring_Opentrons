@@ -8,18 +8,17 @@ metadata = {
     'protocolName': '1-94 sample QPCR',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
     'description': 'A protocol that will carry out qpcr in tiplicate skipping the first and last row, first column '
-                   'and last 2 columns',
+                   'and last 2 columns. Uses samples in a 96 well plate and standards in 1.5ml tubes',
     'apiLevel': '2.9'
 }
 
 # Here you input location of labware
-
-tube_rack1_loc = 1  # Standards go here
+sample_plate_loc = 1  # 96 well plate with samples in it
 tube_rack2_loc = 2  # master mix
-sorenson384_loc = 3  # This is your 384 plate
-sample_plate_loc = 5  # 96 well plate with samples in it
-tip_rack_20_loc = 8
-tip_rack_20_2_loc = 9
+tube_rack1_loc = 3  # Standards go here
+sorenson384_loc = 4  # This is your 384 plate
+tip_rack_20_2_loc = 5
+tip_rack_20_loc = 6
 
 # Here I am putting in the custom labware
 # This is the sorenson 384 plate
@@ -37,16 +36,16 @@ def run(protocol: protocol_api.ProtocolContext):
     starting_sample_num = 1  # position on 96 well plate you start on. ex: 1 = A1, 36 = C12
     # # I suggest doing no more than 95 samples total, this includes your standards
     loaded_standards = 5
-    loaded_samples = 90  # This is how many samples you will be running
+    loaded_samples = 5  # This is how many samples you will be running
     master_mix_loaded = False  # Is the master mix loaded already? False or True
     current_tip_20 = "A1"  # Where the P20 single should start on tip box. Always starts on location 8.
-    master_mix_location = "A1"  # Location of master mix on tube_rack2
 
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
 
     # # makes things start correctly
     starting_sample_num -= 1
+
     # # Creating an array for 384 plate
     plate_array = np.zeros((14, 21), dtype='U25')
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
@@ -71,8 +70,8 @@ def run(protocol: protocol_api.ProtocolContext):
     tiprack_20 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_loc)
     tiprack_20_2 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_2_loc)
     tube_rack1 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack1_loc)
-    tube_rack2 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack2_loc)
-    sample_plate = protocol.load_labware('opentrons_96_aluminumblock_biorad_wellplate_200ul', sample_plate_loc)
+    tube_rack2 = protocol.load_labware('opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap', tube_rack2_loc)
+    sample_plate = protocol.load_labware('opentrons_96_aluminumblock_generic_pcr_strip_200ul', sample_plate_loc)
 
     sorenson_384_wellplate_30ul = protocol.load_labware_from_definition(
         LABWARE_DEF1,
@@ -90,6 +89,8 @@ def run(protocol: protocol_api.ProtocolContext):
     ############################################## commands ########################################################
 
     # Loading the master mix
+    master_mix_location = "A1"
+    mm_amount = 0
     left_pipette.pick_up_tip()
     if not master_mix_loaded:
         for s in range(0, tot_samples):
@@ -98,6 +99,12 @@ def run(protocol: protocol_api.ProtocolContext):
                                   [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
                                    triplicate_samples],
                                   new_tip='never', blow_out=False)
+            mm_amount += 45
+            if (mm_amount >= 1900) and (mm_amount < 3900):
+                master_mix_location = "A2"
+            if mm_amount >= 3900:
+                master_mix_location = "A3"
+
     left_pipette.drop_tip()
 
     # Loading the standards
@@ -106,16 +113,17 @@ def run(protocol: protocol_api.ProtocolContext):
         sample_pickup = get_sample_positions(s, tube_rack_array)
         left_pipette.distribute(5, tube_rack1.wells_by_name()[sample_pickup],
                                 [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
-                                 triplicate_samples], blow_out=True, air_gap=5)
+                                 triplicate_samples], blow_out=True, air_gap=3)
+
     # Loading the samples from the 96 well plate
     sample_num = starting_sample_num
-    for s in range(loaded_standards, loaded_samples):
-        triplicate_samples = get_plate_positions(s, plate_array)
+    for s in range(0, loaded_samples):
+        triplicate_samples = get_plate_positions(s+loaded_standards, plate_array)
 
         sample_pickup = get_plate_positions96(sample_num, well_96_array)
         left_pipette.distribute(5, sample_plate.wells_by_name()[sample_pickup],
                                 [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
-                                 triplicate_samples], blow_out=True, air_gap=5)
+                                 triplicate_samples], blow_out=True, air_gap=3)
         sample_num += 1
 
 ######################################## methods to be used in protocol ############################################
