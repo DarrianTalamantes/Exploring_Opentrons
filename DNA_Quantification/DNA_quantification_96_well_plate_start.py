@@ -8,7 +8,7 @@ metadata = {
     'protocolName': '96 sample fluorescent Quantification',
     'author': 'Darrian Talamantes <darrianrtalamantes6@gmail.com>',
     'description': 'Protocol to use black plate for fluorescent quantification. Samples start in 96 well plate'
-                   'and end in a black corning black',
+                   'and end in a black corning black. columns 1 and 2 are filled with satandard',
     'apiLevel': '2.9'
 }
 

@@ -6,10 +6,10 @@ import pandas as pd
 
 # metadata
 metadata = {
-    'protocolName': '1.5ml to 1.5ml dilution',
+    'protocolName': '96 well to 96 well dilution',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
     'description': 'This protocol will take an excel file with a single column of concentrations '
-                   'and use that to dilute your samples down to X. Goes from 1.5ml tube to a new 1.5ml tube. Final '
+                   'and use that to dilute your samples down to X. Goes from 96 well plate to 96 well plate. Final '
                    'volume will be 100 ul',
     'apiLevel': '2.9'
 }

@@ -5,9 +5,9 @@ import numpy as np
 
 # metadata
 metadata = {
-    'protocolName': '1-94 sample QPCR',
+    'protocolName': '96 well plate to a 384 well plate QPCR',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
-    'description': 'A protocol that will carry out qpcr in tiplicate skipping the first and last row, first column '
+    'description': 'A protocol that will carry out qpcr in tiplicate skipping the first row, first column '
                    'and last 2 columns. Uses samples in a 96 well plate and standards in 1.5ml tubes',
     'apiLevel': '2.9'
 }
@@ -32,10 +32,9 @@ LABWARE_LABEL1 = LABWARE_DEF1.get('metadata', {}).get(
 
 def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
-
+    # # Max samples + standards is 105!
     starting_sample_num = 1  # position on 96 well plate you start on. ex: 1 = A1, 36 = C12
-    # # I suggest doing no more than 95 samples total, this includes your standards
-    loaded_standards = 5
+    loaded_standards = 5  # This includes your water sample!!!!!
     loaded_samples = 5  # This is how many samples you will be running
     master_mix_loaded = False  # Is the master mix loaded already? False or True
     current_tip_20 = "A1"  # Where the P20 single should start on tip box. Always starts on location 8.
@@ -50,7 +49,7 @@ def run(protocol: protocol_api.ProtocolContext):
     plate_array = np.zeros((14, 21), dtype='U25')
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
     for col in range(0, 21):
-        for row in range(0, 14):
+        for row in range(0, 15):
             plate_array[row, col] = alphabate[row + 1] + str(col + 2)
     print(plate_array)
 
