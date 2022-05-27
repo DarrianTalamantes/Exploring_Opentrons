@@ -63,6 +63,54 @@ csv_raw = '''
 80
 100
 110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
+100
+110
 '''
 csv_data = csv_raw.splitlines()[1:]
 concentrations = np.array(csv_data, dtype=float)
@@ -82,10 +130,11 @@ def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
     # Sample information
     target_con = 10  # This is the final concentration we are diluting to
-    current_tip_20 = "B1"  # Where the P20 single should start on tip box.
+    current_tip_20 = "A1"  # Where the P20 single should start on tip box.
     current_tip_300 = "B1"  # Where the p300 single should start on the tip box
     water_location = "A1"  # Location of water on tube_rack2
     water_location2 = "A2"  # Location of second water on tube_rack2
+    water_location3 = "A3"  # Location of third water on tube_rack2
     water_loaded = False  # if you have already loaded the water for some reason this turns to True
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
@@ -124,6 +173,7 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # Loading water
     water_amount = 5000
+    water_tube = 1
     if not water_loaded:
         right_pipette.pick_up_tip()
         for i in range(0, len(aspirations)):
@@ -131,8 +181,12 @@ def run(protocol: protocol_api.ProtocolContext):
             right_pipette.transfer(aspirations[2][i], water_well, dilution_plate.wells_by_name()[water_drop],
                                    new_tip='never', air_gap=10)
             water_amount -= aspirations[2][i]
-            if water_amount <= 200:
+            if (water_amount <= 200) and (water_tube == 1):
                 water_well = tube_rack_15ml.wells_by_name()[water_location2]
+                water_amount = 5000
+                water_tube = 2
+            if (water_amount <= 200) and (water_tube == 2):
+                water_well = tube_rack_15ml.wells_by_name()[water_location3]
         right_pipette.drop_tip()
 
     # adding sample to water
