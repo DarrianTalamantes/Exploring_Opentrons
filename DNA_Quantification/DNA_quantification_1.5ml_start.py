@@ -13,7 +13,7 @@ metadata = {
 
 # Here you input location of labware
 black_plate_loc = 3
-tip_rack_20ul_1_loc = 10
+tip_rack_20ul_1_loc = 8
 tip_rack_200ul_loc = 7
 tube_rack_1_loc = 4
 tube_rack_2_loc = 5
@@ -30,11 +30,12 @@ reservoir_15ml_loc = 6
 def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
     # Sample information
-    loaded_samples = 96  # This is the amount of samples loaded into the machine
+    loaded_standards = 8  # You should never change this, just load your 8 standards in the 1st 8 positions
+    loaded_samples = 8  # This is the amount of samples loaded into the machine, max is 80
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True
-    current_tip_200 = 2  # Where the P300 multi should start on tip box  *** This is the thing youll usually change***
-    master_mix_loc = 1  # what well is the mastermix in?
-    current_tip_20 = "A1"  # Where the 20 ul pipette starts on tips
+    current_tip_200 = 5  # Where the P300 multi should start on tip box
+    master_mix_loc = 2  # what well is the mastermix in?
+    current_tip_20 = "E9"  # Where the 20 ul pipette starts on tips
 
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
@@ -57,7 +58,7 @@ def run(protocol: protocol_api.ProtocolContext):
     left_pipette = protocol.load_instrument('p20_single_gen2', 'left', tip_racks=[tip_rack_20ul_1])
     # Set starting tip
     left_pipette.starting_tip = tip_rack_20ul_1.wells_by_name()[current_tip_20]
-    right_pipette.starting_tip = tip_rack_200ul.wells()[current_tip_200]
+    right_pipette.starting_tip = tip_rack_200ul.columns()[current_tip_200][0]
 
     # Making arrays
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
@@ -75,16 +76,32 @@ def run(protocol: protocol_api.ProtocolContext):
     master_mix_well = reservoir_15ml.wells()[master_mix_loc]
 
     # commands
+    # This loads the master mix
     if not Master_mix_Loaded:
         right_pipette.pick_up_tip()
-        for i in range(0, 12):
+        for i in range(0, math.ceil((loaded_standards+loaded_standards+loaded_samples)/8)):
             right_pipette.transfer(95, master_mix_well, black_plate.columns(i),
-                                   new_tip='never', air_gap=5)
+                                   new_tip='never', air_gap=10)
         right_pipette.drop_tip()
 
-    for s in range(0, loaded_samples):
+    # This loads the standards in the first 16 wells
+    for s in range(0, loaded_standards*2):
+        if s < loaded_standards:
+            sample_pickup = get_sample_positions(s, tube_rack_array)
+            sample_dropoff = get_plate_positions(s, well_96_array)
+            left_pipette.transfer(5, tube_rack_1.wells_by_name()[sample_pickup],
+                                  black_plate.wells_by_name()[sample_dropoff],
+                                  air_gap=5)
+        if s >= loaded_standards:
+            sample_pickup = get_sample_positions(s - loaded_standards, tube_rack_array)
+            sample_dropoff = get_plate_positions(s, well_96_array)
+            left_pipette.transfer(5, tube_rack_1.wells_by_name()[sample_pickup],
+                                  black_plate.wells_by_name()[sample_dropoff],
+                                  air_gap=5)
+
+    for s in range(loaded_standards, loaded_samples+loaded_standards):
         sample_pickup = get_sample_positions(s, tube_rack_array)
-        sample_dropoff = get_plate_positions(s, well_96_array)
+        sample_dropoff = get_plate_positions(s+loaded_standards, well_96_array)
         if (s > 71) & (s <= 95):
             left_pipette.transfer(5, tube_rack_4.wells_by_name()[sample_pickup],
                                   black_plate.wells_by_name()[sample_dropoff],
@@ -122,7 +139,7 @@ def get_plate_positions(current_sample, well_96_array):
         plate_num = current_sample // 96
         subtracted = plate_num * 96
         current_sample = current_sample - subtracted
-    col = current_sample % 12
-    row = current_sample // 12
+    col = current_sample // 8
+    row = current_sample % 8
     grab_this = well_96_array[row][col]
     return (grab_this)

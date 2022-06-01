@@ -35,18 +35,18 @@ def run(protocol: protocol_api.ProtocolContext):
                       12]  # input the 10 columns used for samples. (2 are used for standards)
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True
     current_tip_200 = 1  # column the P300 multi should start on tip_rack_200ul_1
-    te_loc = 1  # what well is the TE buffer in?
-    water_loc = 3  # what well is the water in?
-    water_loc2 = 4  # second location for water
-    dilution = 15  # input your dilution level
-    current_tip_20 = "B1"  # Where the 20 ul pipette starts on tips
+    mater_mix_loc = 1  # what well is the TE buffer in?
+    te_loc = 3  # what well is the water in?
+    te_loc2 = 4  # second location for water
+    dilution = 30  # input your dilution level
+    current_tip_20 = "E4"  # Where the 20 ul pipette starts on tips
 
     ############################################# Code that allows stuff to work ##########################################
     # # This makes things start at 1 instead of 0
     current_tip_200 -= 1
+    mater_mix_loc -= 1
     te_loc -= 1
-    water_loc -= 1
-    water_loc2 -= 1
+    te_loc2 -= 1
     sample_columns = [x - 1 for x in sample_columns]
     # # Creating water and DNA amounts for dilutions
     sample_amount = round(200 / dilution, 2)
@@ -68,12 +68,12 @@ def run(protocol: protocol_api.ProtocolContext):
     left_pipette = protocol.load_instrument('p20_single_gen2', 'left', tip_racks=[tip_rack_20ul])
 
     # Set starting tip
-    right_pipette.starting_tip = tip_rack_200ul_1.wells()[current_tip_200]
+    right_pipette.starting_tip = tip_rack_200ul_1.columns()[current_tip_200][0]
     left_pipette.starting_tip = tip_rack_20ul.wells_by_name()[current_tip_20]
 
     # # setting master mix in correct spot
+    mm_well = reservoir_15ml.wells()[mater_mix_loc]
     te_well = reservoir_15ml.wells()[te_loc]
-    water_well = reservoir_15ml.wells()[water_loc]
 
     # # Making arrays
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
@@ -93,7 +93,7 @@ def run(protocol: protocol_api.ProtocolContext):
     if not Master_mix_Loaded:
         right_pipette.pick_up_tip()
         for i in range(0, sample_col + 2):
-            right_pipette.transfer(95, te_well, black_plate.columns(i),
+            right_pipette.transfer(95, mm_well, black_plate.columns(i),
                                    new_tip='never', air_gap=10)
         right_pipette.drop_tip()
 
@@ -117,11 +117,11 @@ def run(protocol: protocol_api.ProtocolContext):
     water = 0
     right_pipette.pick_up_tip()
     for col in range(2, sample_col + 2):
-        right_pipette.transfer(water_amount, water_well, dilution_plate.columns(col),
-                               new_tip='never', air_gap=10)
+        right_pipette.transfer(water_amount, te_well, dilution_plate.columns(col),
+                               new_tip='never')  # air gap caused inaccuracy 
         water += water_amount * 8
         if water > 10000:
-            water_well = reservoir_15ml.wells()[water_loc2]
+            te_well = reservoir_15ml.wells()[te_loc2]
     right_pipette.drop_tip()
 
     for col in range(2, sample_col + 2):
