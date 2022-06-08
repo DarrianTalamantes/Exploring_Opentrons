@@ -34,8 +34,8 @@ def run(protocol: protocol_api.ProtocolContext):
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True
     current_tip_200 = 2  # column the P300 multi should start on tip_rack_200ul_1
     mater_mix_loc = 1  # what well is the TE buffer in?
-    te_loc = 3  # what well is the water in? load a little bit more than 10 ml of te in these wells
-    te_loc2 = 4  # second location for water
+    te_loc = 3  # what well is the TE in? load a little bit more than 12 ml of te in these wells
+    te_loc2 = 4  # second location for TE
     dilution = 20  # input your dilution level
     current_tip_20 = 1  # Where the 20 ul pipette starts on tips
 
@@ -47,7 +47,8 @@ def run(protocol: protocol_api.ProtocolContext):
     te_loc -= 1
     te_loc2 -= 1
     sample_columns = [x - 1 for x in sample_columns]
-    # # Creating water and DNA amounts for dilutions
+
+    # # Creating TE and DNA amounts for dilutions
     sample_amount = round(200 / dilution, 2)
     te_amount = 200 - sample_amount
 
