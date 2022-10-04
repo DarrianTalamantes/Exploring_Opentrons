@@ -15,52 +15,58 @@ metadata = {
 }
 # Input CSV
 csv_raw = '''
-125
-83
-65
+89.12
+84.04
+105.4
+75.02
+96.84
+96.72
+101.16
+109.5
+90.76
+82.38
+113.48
+77.36
+101.6
+77.72
+83.5
+65.44
+92.26
+66.6
+59.8
+55.94
+86.9
+88.56
+89.26
+70.14
+48.92
+78.92
+65.5
+99.38
+73.54
+102.3
+79.86
+41.58
+99.16
+27.68
 111
-45
-53
-50
-73
-100
-101
-120
-75
-35
-62
-45
-125
-83
-65
-111
-45
-53
-50
-73
-100
-101
-120
-75
-35
-62
-45
-125
-83
-65
-111
-45
-53
-50
-73
-100
-101
-120
-75
-35
-62
-45
-100
+97.22
+85.38
+84.72
+86.56
+37.22
+108.42
+31.34
+56.46
+111.42
+89.12
+42.04
+31.64
+52.76
+56.74
+41.92
+54.08
+38.16
 '''
 csv_data = csv_raw.splitlines()[1:]
 concentrations = np.array(csv_data, dtype=float)
@@ -87,9 +93,10 @@ def run(protocol: protocol_api.ProtocolContext):
     ################################ Variable input below ######################################################
     # Sample information
     target_con = 10  # This is the final concentration we are diluting to
-    current_tip_20 = "B1"  # Where the P20 single should start on tip box.
-    current_tip_300 = "B1"  # Where the p300 single should start on the tip box
-    water_location = "A1"  # Location of master mix on tube_rack2
+    current_tip_20 = "A1"  # Where the P20 single should start on tip box.
+    current_tip_300 = "A1"  # Where the p300 single should start on the tip box
+    water_location = "A1"  # Location of water on tube_rack_15ml
+    water_location_2 = "A2"  # Location of water 2 on tube_rack_15ml
     water_loaded = False  # if you have already loaded the water for some reason this turns to True
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
@@ -128,12 +135,14 @@ def run(protocol: protocol_api.ProtocolContext):
     # # formatting data better
     aspirations = set_up_data(concentrations, target_con)
 
-    # commands
+    ################################################## commands ######################################################
 
     # Loading water
     if not water_loaded:
         right_pipette.pick_up_tip()
         for i in range(0, len(aspirations)):
+            if i == 49:
+                water_well = tube_rack_15ml.wells_by_name()[water_location_2]
             water_drop = get_tube_positions(i, tube_rack_array)
             if (i > 71) & (i <= 95):
                 right_pipette.transfer(aspirations[2][i], water_well, tube_rack8.wells_by_name()[water_drop],

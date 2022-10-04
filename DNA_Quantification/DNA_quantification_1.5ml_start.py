@@ -35,7 +35,7 @@ def run(protocol: protocol_api.ProtocolContext):
     # Sample information
     dilution = 20  # input your dilution level
     loaded_standards = 8  # You should never change this, just load your 8 standards in the 1st 8 positions
-    loaded_samples = 20  # This is the amount of samples loaded into the machine, max is 80
+    loaded_samples = 63  # This is the amount of samples loaded into the machine, max is 80
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True
     current_tip_200 = 2  # Where the P300 multi should start on tip box
     master_mix_loc = 1  # what well is the mastermix in?
