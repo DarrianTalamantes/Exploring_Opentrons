@@ -18,10 +18,10 @@ dilution_plate_loc = 2
 black_plate_loc = 3
 tube_rack_3_loc = 4
 tube_rack_4_loc = 5
-tip_rack_20ul_1_loc = 6
+tip_rack_20ul_2_loc = 6
 tube_rack_1_loc = 7
 tube_rack_2_loc = 8
-tip_rack_20ul_2_loc = 9
+tip_rack_20ul_1_loc = 9
 tip_rack_200ul_1_loc = 10
 
 
@@ -35,9 +35,9 @@ def run(protocol: protocol_api.ProtocolContext):
     # Sample information
     dilution = 20  # input your dilution level
     loaded_standards = 8  # You should never change this, just load your 8 standards in the 1st 8 positions
-    loaded_samples = 63  # This is the amount of samples loaded into the machine, max is 80
+    loaded_samples = 80  # This is the amount of samples loaded into the machine, max is 80
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True
-    current_tip_200 = 2  # Where the P300 multi should start on tip box
+    current_tip_200 = 1  # Where the P300 multi should start on tip box
     master_mix_loc = 1  # what well is the mastermix in?
     te_loc = 3  # what well is the TE in? load a little bit more than 12 ml of te in these wells
     te_loc2 = 4  # second location for TE
@@ -140,19 +140,19 @@ def run(protocol: protocol_api.ProtocolContext):
         sample_pickup = get_sample_positions(s, tube_rack_array)
         sample_dropoff = sample_dropoff_positions(s-loaded_standards, well_96_array_big_partial)
         if (s > 71) & (s <= 95):
-            left_pipette.transfer(5, tube_rack_4.wells_by_name()[sample_pickup],
+            left_pipette.transfer(sample_amount, tube_rack_4.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
                                   air_gap=5)
         if (s > 47) & (s <= 71):
-            left_pipette.transfer(5, tube_rack_3.wells_by_name()[sample_pickup],
+            left_pipette.transfer(sample_amount, tube_rack_3.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
                                   air_gap=5)
         if (s > 23) & (s <= 47):
-            left_pipette.transfer(5, tube_rack_2.wells_by_name()[sample_pickup],
+            left_pipette.transfer(sample_amount, tube_rack_2.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
                                   air_gap=5)
         if (s >= 0) & (s <= 23):
-            left_pipette.transfer(5, tube_rack_1.wells_by_name()[sample_pickup],
+            left_pipette.transfer(sample_amount, tube_rack_1.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
                                   air_gap=5)
     # # Pauses the protocol

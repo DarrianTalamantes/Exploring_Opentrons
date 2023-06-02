@@ -6,95 +6,94 @@ import pandas as pd
 
 # metadata
 metadata = {
-    'protocolName': '1.5ml to 1.5ml dilution',
+    'protocolName': '1.5ml to 1.5ml dilution with water trough 241-320',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
-    'description': 'This protocol will take an excel file with a single column of concentrations '
-                   'and use that to dilute your samples down to X. Goes from 1.5ml tube to a new 1.5ml tube. Final '
-                   'volume will be 100 ul',
+    'description': 'This protocol is nearly identical to the 1.5 to 1.5 dilution but uses a 15 ml resiviour to grab '
+                   'water from ',
     'apiLevel': '2.9'
 }
 # Input CSV
 csv_raw = '''
-72.7
-81.36
-99.62
-62.02
-67.16
-102.64
-128.28
-73.68
-53.2
-20.6
-51.5
-127.4
-67.62
-53.46
-66.54
-113.18
-97.24
-73.2
-66.98
-34.02
-103.56
-119.64
-50.56
-71.48
-66.76
-96.26
-96.56
-94.98
-41.9
-24.58
-75.68
-141.36
-100.44
+83.52
+41.2
+78.08
+91.92
+76.76
+57.24
+81.08
+72.72
+79.58
+82.8
+93.02
+76.42
+79.58
+1
+74.1
+61.78
+61.12
+55.24
+61.88
+79.7
+72.34
+86.9
+110.3
+78.14
+47.08
+75.28
+61.34
+44.96
+71.3
+57.04
+99.98
+69.68
+104.02
+48.5
+63.04
+73.06
+75.46
+39.44
+72.84
+76.46
+64.28
+93.34
+81.84
+93.26
+86.5
+68.84
 74.06
-71.7
-83.84
-76.1
-97.92
-46.42
-54.68
-131.6
-84.9
-74.44
-80.7
-70.12
-74.66
-91.46
-24.36
-46.04
-22.26
-82.14
-75.72
-47.48
-42.64
-73.46
-48.24
-107.66
-74.28
-31.86
-45.46
-102.2
-87.6
-63.54
-66.7
-32.8
-104.22
-93.92
-51.26
-42.02
-32.36
-99.5
-93.32
-60.6
-43.98
-57.12
-74.64
-102.02
-41.64
-22.22
-58.76
+84.86
+72.72
+77.92
+55.72
+56.04
+69.14
+39.48
+55.34
+57.6
+66.28
+71.52
+65.42
+54.08
+89.98
+107.98
+76.68
+91.66
+69.7
+70.42
+67.2
+74.46
+75.96
+69.48
+77.64
+82.02
+86.7
+36.64
+53.22
+66.48
+58.4
+69.66
+65.66
+73.28
 '''
 csv_data = csv_raw.splitlines()[1:]
 concentrations = np.array(csv_data, dtype=float)
@@ -102,7 +101,7 @@ concentrations = np.array(csv_data, dtype=float)
 # Here you input location of labware
 tip_rack_20_loc = 9  # tip rack for p20 single channel
 tip_rack_300_loc = 6  # tip rack for p300 single channel
-tube_rack_15ml_loc = 3  # tube rack 15ml with water in A1
+reservoir_15ml_loc = 3  # tube rack 15ml with water in A1
 tube_rack1_loc = 10  # first set of samples goes here
 tube_rack2_loc = 11  # first set of dilutions will be here
 tube_rack3_loc = 7  # second set of samples will be here
@@ -123,12 +122,13 @@ def run(protocol: protocol_api.ProtocolContext):
     target_con = 10  # This is the final concentration we are diluting to
     current_tip_20 = "A1"  # Where the P20 single should start on tip box.
     current_tip_300 = "A1"  # Where the p300 single should start on the tip box
-    water_location = "A1"  # Location of water on tube_rack_15ml
-    water_location_2 = "A2"  # Location of water 2 on tube_rack_15ml
-    water_loaded = False  # if you have already loaded the water for some reason this turns to True
+    water_location = 1  # Location of water on reservoir_15ml
+    water_loaded = True  # if you have already loaded the water for some reason this turns to True
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
 
+    # # Making this start at 1 instead of zero
+    water_location -= 1
     # # Creating an array for the sample plate
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
     tube_rack_array = np.zeros((4, 6), dtype='U25')
@@ -139,7 +139,7 @@ def run(protocol: protocol_api.ProtocolContext):
     # #  labware
     tiprack_20 = protocol.load_labware('opentrons_96_filtertiprack_20ul', tip_rack_20_loc)
     tip_rack_300 = protocol.load_labware('opentrons_96_tiprack_300ul', tip_rack_300_loc)
-    tube_rack_15ml = protocol.load_labware('opentrons_15_tuberack_falcon_15ml_conical', tube_rack_15ml_loc)
+    reservoir_15ml = protocol.load_labware('nest_12_reservoir_15ml', reservoir_15ml_loc)
     tube_rack1 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack1_loc)
     tube_rack2 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack2_loc)
     tube_rack3 = protocol.load_labware('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', tube_rack3_loc)
@@ -158,7 +158,7 @@ def run(protocol: protocol_api.ProtocolContext):
     right_pipette.starting_tip = tip_rack_300.wells_by_name()[current_tip_300]
 
     # #  setting water location
-    water_well = tube_rack_15ml.wells_by_name()[water_location]
+    water_well = reservoir_15ml.wells()[water_location]
 
     # # formatting data better
     aspirations = set_up_data(concentrations, target_con)
@@ -169,8 +169,6 @@ def run(protocol: protocol_api.ProtocolContext):
     if not water_loaded:
         right_pipette.pick_up_tip()
         for i in range(0, len(aspirations)):
-            if i == 49:
-                water_well = tube_rack_15ml.wells_by_name()[water_location_2]
             water_drop = get_tube_positions(i, tube_rack_array)
             if (i > 71) & (i <= 95):
                 right_pipette.transfer(aspirations[2][i], water_well, tube_rack8.wells_by_name()[water_drop],
@@ -215,18 +213,20 @@ def set_up_data(concentrations, target_con):
     sample_num_array = np.empty([sample_num], dtype=float)
     water_array = np.empty([sample_num], dtype=float)
     DNA_array = np.empty([sample_num], dtype=float)
-    pipette_array_water = np.empty([sample_num], dtype=float)
-    pipette_array_dna = np.empty([sample_num], dtype=float)
 
     for i in range(0, sample_num):
         sample_num_array[i] = i + 1
 
     # # Filling in arrays for the machine to know how much water and sample is needed
     for i in range(0, sample_num):
-        dna = round(100 * target_con / concentrations[i], 2)
-        water = 100 - dna
-        DNA_array[i] = dna
-        water_array[i] = water
+        if (concentrations[i] <= target_con):
+            water_array[i] = 0
+            DNA_array[i] = 0
+        else:
+            dna = round(100 * target_con / concentrations[i], 2)
+            water = 100 - dna
+            DNA_array[i] = dna
+            water_array[i] = water
 
     # # Combining all the data into one big data frame
     big_data = pd.DataFrame(np.column_stack((sample_num_array, DNA_array, water_array)))
