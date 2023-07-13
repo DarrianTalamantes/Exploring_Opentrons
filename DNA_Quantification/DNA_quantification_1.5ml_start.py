@@ -5,7 +5,7 @@ import numpy as np
 
 # metadata
 metadata = {
-    'protocolName': '96 sample fluorescent Quantification',
+    'protocolName': '80 sample fluorescent Quantification, set up for 80 samples, MM well 6',
     'author': 'Darrian Talamantes <darrianrtalamantes6@gmail.com>',
     'description': 'Protocol to use black plate for fluorescent quantification. Does 80 samples plus 16 standards.',
     'apiLevel': '2.9'
@@ -36,9 +36,10 @@ def run(protocol: protocol_api.ProtocolContext):
     dilution = 20  # input your dilution level
     loaded_standards = 8  # You should never change this, just load your 8 standards in the 1st 8 positions
     loaded_samples = 80  # This is the amount of samples loaded into the machine, max is 80
-    Master_mix_Loaded = False  # Is the master mix loaded already? False or True
+    Master_mix_Loaded = False  # Is the master mix loaded already? False or True (skips loading master ix, TE into
+    # wells and standards into master mix
     current_tip_200 = 1  # Where the P300 multi should start on tip box
-    master_mix_loc = 1  # what well is the mastermix in?
+    master_mix_loc = 6  # what well is the mastermix in?
     te_loc = 3  # what well is the TE in? load a little bit more than 12 ml of te in these wells
     te_loc2 = 4  # second location for TE
     current_tip_20 = "A1"  # Where the 20 ul pipette starts on tips
@@ -114,26 +115,26 @@ def run(protocol: protocol_api.ProtocolContext):
         right_pipette.drop_tip()
 
     # # This loads the TE buffer into the dilution plate
-    te = 0
-    sample_col = int(math.ceil(loaded_samples / 8))
-    right_pipette.pick_up_tip()
-    for col in range(2, sample_col+2):
-        right_pipette.transfer(te_amount, te_well, dilution_plate.columns(col),
-                               new_tip='never')  # air gap caused inaccuracy
-        te += te_amount * 8
-        if te > 10000:
-            te_well = reservoir_15ml.wells()[te_loc2]
-    right_pipette.drop_tip()
+        te = 0
+        sample_col = int(math.ceil(loaded_samples / 8))
+        right_pipette.pick_up_tip()
+        for col in range(2, sample_col+2):
+            right_pipette.transfer(te_amount, te_well, dilution_plate.columns(col),
+                                   new_tip='never')  # air gap caused inaccuracy
+            te += te_amount * 8
+            if te > 10000:
+                te_well = reservoir_15ml.wells()[te_loc2]
+        right_pipette.drop_tip()
 
-    # # Input standards to black plate
-    for s in range(0, 8):
-        std_pickup = get_sample_positions(s, tube_rack_array)
-        numoff = s * 2
-        std_dropoff = standard_dropoff_positions(numoff, well_96_array_partial)
-        std_dropoff2 = standard_dropoff_positions(numoff + 1, well_96_array_partial)
-        left_pipette.distribute(5, tube_rack_1.wells_by_name()[std_pickup],
-                                [black_plate.wells_by_name()[well_name] for well_name in [std_dropoff, std_dropoff2]],
-                                air_gap=5)
+        # # Input standards to black plate
+        for s in range(0, 8):
+            std_pickup = get_sample_positions(s, tube_rack_array)
+            numoff = s * 2
+            std_dropoff = standard_dropoff_positions(numoff, well_96_array_partial)
+            std_dropoff2 = standard_dropoff_positions(numoff + 1, well_96_array_partial)
+            left_pipette.distribute(5, tube_rack_1.wells_by_name()[std_pickup],
+                                    [black_plate.wells_by_name()[well_name] for well_name in [std_dropoff, std_dropoff2]],
+                                    air_gap=5)
 
     # # This loads sample into the TE
     for s in range(loaded_standards, loaded_samples + loaded_standards):

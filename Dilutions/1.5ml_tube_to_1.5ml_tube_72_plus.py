@@ -6,7 +6,7 @@ import pandas as pd
 
 # metadata
 metadata = {
-    'protocolName': '1.5ml to 1.5ml dilution with water trough 241-320',
+    'protocolName': '1.5ml to 1.5ml dilution with water trough 801-880',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
     'description': 'This protocol is nearly identical to the 1.5 to 1.5 dilution but uses a 15 ml resiviour to grab '
                    'water from ',
@@ -14,86 +14,86 @@ metadata = {
 }
 # Input CSV
 csv_raw = '''
-83.52
-41.2
-78.08
-91.92
-76.76
-57.24
-81.08
-72.72
-79.58
-82.8
-93.02
-76.42
-79.58
-1
-74.1
-61.78
-61.12
-55.24
-61.88
-79.7
-72.34
-86.9
-110.3
-78.14
-47.08
-75.28
-61.34
-44.96
-71.3
-57.04
-99.98
-69.68
-104.02
-48.5
-63.04
-73.06
-75.46
-39.44
-72.84
-76.46
-64.28
-93.34
-81.84
-93.26
-86.5
-68.84
-74.06
-84.86
-72.72
-77.92
-55.72
-56.04
-69.14
-39.48
-55.34
-57.6
-66.28
-71.52
-65.42
-54.08
-89.98
-107.98
-76.68
-91.66
-69.7
-70.42
-67.2
+90.82
+71.62
+95.88
+84.22
+88.42
+89.82
+84.7
+53.8
+47.86
+71.22
+85.94
+81.1
+93.48
+96.76
+82.08
+73.98
+66.5
 74.46
-75.96
-69.48
-77.64
+69.1
+97.6
+77.24
+59.28
+76.28
+58.8
+76.78
+75.56
+72.26
+51.18
+78.36
+82.64
+84.76
+62.04
+83.32
+66.98
+82.9
+67.38
+75.38
+65.82
+50.3
+51
+47.16
+75.42
+92.52
+33.38
+73.2
+75.46
+64.3
+56.18
+78.9
+85.94
+61.08
+80.88
+74.56
+58.58
+67.56
+85.68
+79.32
+46.6
+51.06
+84.52
+103.96
+70.82
+68.94
+100.02
+88.9
+85.5
+67.34
+71.46
+41.94
+63.52
+81.12
+86.28
+80.16
+68.98
 82.02
-86.7
-36.64
-53.22
-66.48
-58.4
-69.66
-65.66
-73.28
+68.74
+69.56
+63.96
+76.64
+79.78
 '''
 csv_data = csv_raw.splitlines()[1:]
 concentrations = np.array(csv_data, dtype=float)
@@ -123,7 +123,7 @@ def run(protocol: protocol_api.ProtocolContext):
     current_tip_20 = "A1"  # Where the P20 single should start on tip box.
     current_tip_300 = "A1"  # Where the p300 single should start on the tip box
     water_location = 1  # Location of water on reservoir_15ml
-    water_loaded = True  # if you have already loaded the water for some reason this turns to True
+    water_loaded = False  # if you have already loaded the water for some reason this turns to True
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
 
