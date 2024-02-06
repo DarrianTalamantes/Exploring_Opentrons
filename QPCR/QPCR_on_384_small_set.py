@@ -5,7 +5,7 @@ import numpy as np
 
 # metadata
 metadata = {
-    'protocolName': '1-94 sample QPCR, set up for 92',
+    'protocolName': '1-94 sample QPCR, set up for 78',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
     'description': 'A protocol that will carry out qpcr in tiplicate skipping the first and last row, first column '
                    'and last 2 columns. It uses 1.5 ml tubes to the 384 plate',
@@ -30,7 +30,7 @@ def run(protocol: protocol_api.ProtocolContext):
     starting_sample = 1  # Current sample number. Essentially changes position machine starts on the 384 plate
     # I suggest doing no more than 95 samples. That will be enough for exactly one tip box. Max is 96. (include
     # standards here)
-    loaded_samples = 92 # This is how many samples you will be running. Always starts at sample rack1 A1.
+    loaded_samples = 78 # This is how many samples you will be running. Always starts at sample rack1 A1.
     master_mix_loaded = False  # Is the master mix loaded already? False or True
     current_tip_20 = "A1"  # Where the P20 single should start on tip box. Always starts on location 8.
     master_mix_location = "A1"  # Location of master mix on tube_rack2

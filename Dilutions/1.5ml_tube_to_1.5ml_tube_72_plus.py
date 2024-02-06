@@ -6,7 +6,7 @@ import pandas as pd
 
 # metadata
 metadata = {
-    'protocolName': '1.5ml to 1.5ml dilution with water trough 1201-1280',
+    'protocolName': '1.5ml to 1.5ml dilution with water trough 1281-end+Redoes',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
     'description': 'This protocol is nearly identical to the 1.5 to 1.5 dilution but uses a 15 ml resiviour to grab '
                    'water from ',
@@ -14,86 +14,72 @@ metadata = {
 }
 # Input CSV
 csv_raw = '''
-125.28
-93.4
-40.42
-85.24
-93.76
-86.14
-117.32
-78.3
-76.6
-72.66
-107.58
-90.58
-87.12
-83.78
-85.5
-98.74
-93.24
-59.44
-76.28
-75.3
-120.1
-91.72
-70.26
-127.74
-116.88
-87.16
-95.14
-98.26
-69.34
-63.44
-136.58
-73.16
-70.7
-85.22
-89.42
-65.1
+98.44
+94.44
+98.3
+87.78
+80.32
+87.74
+36.7
+61.62
+99.28
+95.3
+56.52
+98.8
+84.34
+99.94
+79.26
+16.88
+55.26
+58.32
+19.1
+69.62
+78.74
+57.96
+70.36
+72.52
+0.48
+19.76
+81.42
+88.7
+63.3
+66.74
+60.42
+63.62
+60.08
+-3.76
+64.02
+88.92
+82.76
+79.6
+81.32
+62.84
+62.62
+59.1
+88.6
+88
+77.66
+72.56
+67.42
+-3.72
+75.02
+69.56
+84.44
+101.94
+66.88
+47.22
+69.76
+-4.32
+56.14
+64.76
 88.68
-70.62
-79.32
-86.3
-91.14
-82.36
-84.86
-74.86
-82.68
-82.74
-68.48
-69.06
-79.72
-57.36
-109.48
-94.64
-105.04
-82.4
-77.84
-100.34
-92.6
-69.84
-69.64
-15.3
-101.84
-59.4
-89.9
-85.5
-78
-90.16
-75.46
-92.68
-83.32
-50.08
-83.74
-100.44
-81.28
-52.58
-107.36
-81.26
-45.66
-73.14
-52.04
-67.4
+97.64
+83.94
+83.46
+85.22
+64.78
+62.22
+24.9
 '''
 csv_data = csv_raw.splitlines()[1:]
 concentrations = np.array(csv_data, dtype=float)
@@ -122,7 +108,7 @@ def run(protocol: protocol_api.ProtocolContext):
     target_con = 10  # This is the final concentration we are diluting to
     current_tip_20 = "A1"  # Where the P20 single should start on tip box.
     current_tip_300 = "A1"  # Where the p300 single should start on the tip box
-    water_location = 1  # Location of water on reservoir_15ml
+    water_location = 6  # Location of water on reservoir_15ml
     water_loaded = False  # if you have already loaded the water for some reason this turns to True
     # Need to add a specification on what tip rack column to start on
     ############################################# Code that allows stuff to work ##########################################
