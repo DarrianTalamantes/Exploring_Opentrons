@@ -5,10 +5,10 @@ import numpy as np
 
 # metadata
 metadata = {
-    'protocolName': '1-94 sample QPCR, set up for 78',
+    'protocolName': 'QPCR of standard curves',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
-    'description': 'A protocol that will carry out qpcr in tiplicate skipping the first and last row, first column '
-                   'and last 2 columns. It uses 1.5 ml tubes to the 384 plate',
+    'description': 'A protocol that will carry out the testing of multiple standard curves. Uses 3 sets of a 5 part '
+                   'dilution',
     'apiLevel': '2.9'
 }
 
@@ -64,40 +64,41 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # Loading the master mix
     # Idea here is to load the master mix of each primer set into seperate rows. Each row loading 15 columns
-    left_pipette.pick_up_tip()
     if not master_mix_loaded:
         for p in range(0, Primers):
             primer_location = get_sample_positions(p, tube_rack_array)
+            left_pipette.pick_up_tip()
             for col in range(0, 15):
-                mastermix_deposit_loc = get_deposit_location(p + 1, col + 1, plate_array)
+                mastermix_deposit_loc = get_deposit_location(p, col, plate_array)
                 left_pipette.transfer(15, tube_rack2.wells_by_name()[primer_location],
-                                      [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
-                                       mastermix_deposit_loc],
-                                      new_tip='never', blow_out=False)
+                                      [sorenson_384_wellplate_30ul.wells_by_name()[mastermix_deposit_loc]],
+                                      new_tip='Never', blow_out=False)
             left_pipette.drop_tip()
 
     # Loading the dilutions
-    for p in range(0, Primers):
-        for col in range(0,15):
+        for col in range(0, 15):
             remainder = col % 5
             if col < 5:
-                dilution_pickup = get_dilution_locations(p, remainder, tube_rack_array)
-                deposit_loc = get_deposit_location(p + 1, col + 1, plate_array)
-                left_pipette.transfer(5, tube_rack1.wells_by_name()[dilution_pickup],
-                                        [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
-                                         deposit_loc], blow_out=True, air_gap=2)
+                for p in range(0, Primers):
+                    dilution_pickup = get_dilution_locations(0, remainder, tube_rack_array)
+                    deposit_loc = get_deposit_location(p, col, plate_array)
+                    left_pipette.transfer(5, tube_rack1.wells_by_name()[dilution_pickup],
+                                          [sorenson_384_wellplate_30ul.wells_by_name()[deposit_loc]]
+                                          , blow_out=True, air_gap=2)
             if (col < 10) & (col >= 5):
-                dilution_pickup = get_dilution_locations(p, remainder, tube_rack_array)
-                deposit_loc = get_deposit_location(p + 1, col + 1, plate_array)
-                left_pipette.transfer(5, tube_rack1.wells_by_name()[dilution_pickup],
-                                        [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
-                                         deposit_loc], blow_out=True, air_gap=2)
+                for p in range(0, Primers):
+                    dilution_pickup = get_dilution_locations(1, remainder, tube_rack_array)
+                    deposit_loc = get_deposit_location(p, col, plate_array)
+                    left_pipette.transfer(5, tube_rack1.wells_by_name()[dilution_pickup],
+                                          [sorenson_384_wellplate_30ul.wells_by_name()[deposit_loc]]
+                                          , blow_out=True, air_gap=2)
             if (col < 15) & (col >= 10):
-                dilution_pickup = get_dilution_locations(p, remainder, tube_rack_array)
-                deposit_loc = get_deposit_location(p + 1, col + 1, plate_array)
-                left_pipette.transfer(5, tube_rack1.wells_by_name()[dilution_pickup],
-                                        [sorenson_384_wellplate_30ul.wells_by_name()[well_name] for well_name in
-                                         deposit_loc], blow_out=True, air_gap=2)
+                for p in range(0, Primers):
+                    dilution_pickup = get_dilution_locations(2, remainder, tube_rack_array)
+                    deposit_loc = get_deposit_location(p, col, plate_array)
+                    left_pipette.transfer(5, tube_rack1.wells_by_name()[dilution_pickup],
+                                          [sorenson_384_wellplate_30ul.wells_by_name()[deposit_loc]]
+                                          , blow_out=True, air_gap=2)
 
 
 ######################################## methods to be used in protocol ############################################

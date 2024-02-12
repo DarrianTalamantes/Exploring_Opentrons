@@ -9,11 +9,11 @@ def main():
     loaded_samples = 100
     current_sample -= 1
     # Creating an array for 384 plate
-    plate_array = np.zeros((16, 24), dtype='U25')
+    plate_array = np.zeros((14, 21), dtype='U25')
     alphabate = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-    for col in range(0, 24):
-        for row in range(0, 16):
-            plate_array[row, col] = alphabate[row] + str(col + 1)
+    for col in range(0, 21):
+        for row in range(0, 14):
+            plate_array[row, col] = alphabate[row + 1] + str(col + 2)
 
     # Creating an array for the sample plate
     tube_rack_array = np.zeros((4, 6), dtype='U25')
@@ -27,14 +27,46 @@ def main():
         for row1 in range(0, 8):
             well_96_array[row1, col1] = alphabate[row1] + str(col1 + 1)
 
-    # Testing sample array
-    # for s in range(0, loaded_samples):
-    #     sample_position = get_sample_positions(s, tube_rack_array)
-    #     print(sample_position)
+    ##### Testing Portion
+    Primers = 3
+    for p in range(0, Primers):
+        primer_location = get_sample_positions(p, tube_rack_array)
+        for col in range(0, 15):
+            mastermix_deposit_loc = get_deposit_location(p, col, plate_array)
+            print(primer_location, mastermix_deposit_loc)
 
-    for s in range(0, loaded_samples):
-        plate_positions = get_plate_positions(s, well_96_array)
-        print(plate_positions)
+    print("######################")
+    for col in range(0,15):
+        remainder = col % 5
+        if col < 5:
+            for p in range(0, Primers):
+                dilution_pickup = get_dilution_locations(0, remainder, tube_rack_array)
+                deposit_loc = get_deposit_location(p, col, plate_array)
+                print(col, dilution_pickup, deposit_loc)
+
+        if (col < 10) & (col >= 5):
+            for p in range(0, Primers):
+                dilution_pickup = get_dilution_locations(1, remainder, tube_rack_array)
+                deposit_loc = get_deposit_location(p, col, plate_array)
+                print(col, dilution_pickup, deposit_loc)
+
+        if (col < 15) & (col >= 10):
+            for p in range(0, Primers):
+                dilution_pickup = get_dilution_locations(2, remainder, tube_rack_array)
+                deposit_loc = get_deposit_location(p, col, plate_array)
+                print(col, dilution_pickup, deposit_loc)
+
+
+# Functions for the code below here
+
+def get_dilution_locations(group, dilution, tube_rack_array):
+    position = tube_rack_array[group, dilution]
+    return position
+
+
+def get_deposit_location(primer, column, plate_array):
+    position = plate_array[primer, column]
+    return position
 
 
 def get_plate_positions(current_sample, well_96_array):
