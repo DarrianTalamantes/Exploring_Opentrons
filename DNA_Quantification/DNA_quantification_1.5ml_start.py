@@ -5,7 +5,7 @@ import numpy as np
 
 # metadata
 metadata = {
-    'protocolName': '80 sample fluorescent Quantification, set up for 65 samples, MM well 1',
+    'protocolName': '80 sample fluorescent Quantification, set up for 10 samples, MM well 10',
     'author': 'Darrian Talamantes <darrianrtalamantes6@gmail.com>',
     'description': 'Protocol to use black plate for fluorescent quantification. Does 80 samples plus 16 standards.',
     'apiLevel': '2.9'
@@ -35,11 +35,11 @@ def run(protocol: protocol_api.ProtocolContext):
     # Sample information
     dilution = 20  # input your dilution level
     loaded_standards = 8  # You should never change this, just load your 8 standards in the 1st 8 positions
-    loaded_samples = 65  # This is the amount of samples loaded into the machine, max is 80
+    loaded_samples = 10  # This is the amount of samples loaded into the machine, max is 80
     Master_mix_Loaded = False  # Is the master mix loaded already? False or True (skips loading master ix, TE into
     # wells and standards into master mix
     current_tip_200 = 1  # Where the P300 multi should start on tip box
-    master_mix_loc = 1  # what well is the mastermix in?
+    master_mix_loc = 10  # what well is the mastermix in?
     te_loc = 3  # what well is the TE in? load a little bit more than 12 ml of te in these wells
     te_loc2 = 4  # second location for TE
     current_tip_20 = "A1"  # Where the 20 ul pipette starts on tips
@@ -111,7 +111,7 @@ def run(protocol: protocol_api.ProtocolContext):
         right_pipette.pick_up_tip()
         for i in range(0, math.ceil((loaded_standards + loaded_standards + loaded_samples) / 8)):
             right_pipette.transfer(95, mm_well, black_plate.columns(i),
-                                   new_tip='never', air_gap=10)
+                                   new_tip='never', air_gap=10, blow_out=True, blowout_location="destination well")
         right_pipette.drop_tip()
 
     # # This loads the TE buffer into the dilution plate
@@ -120,7 +120,7 @@ def run(protocol: protocol_api.ProtocolContext):
         right_pipette.pick_up_tip()
         for col in range(2, sample_col+2):
             right_pipette.transfer(te_amount, te_well, dilution_plate.columns(col),
-                                   new_tip='never')  # air gap caused inaccuracy
+                                   new_tip='never', air_gap=10, blow_out=True, blowout_location="destination well")  
             te += te_amount * 8
             if te > 10000:
                 te_well = reservoir_15ml.wells()[te_loc2]
@@ -134,7 +134,12 @@ def run(protocol: protocol_api.ProtocolContext):
             std_dropoff2 = standard_dropoff_positions(numoff + 1, well_96_array_partial)
             left_pipette.distribute(5, tube_rack_1.wells_by_name()[std_pickup],
                                     [black_plate.wells_by_name()[well_name] for well_name in [std_dropoff, std_dropoff2]],
-                                    air_gap=5)
+                                    air_gap=3, blow_out=True)
+            # In case we need to transfer cause distribute isnt working
+            # left_pipette.transfer(5, tube_rack_1.wells_by_name()[std_pickup], black_plate.wells_by_name()[std_dropoff],
+            #             air_gap=5, blow_out=True, blowout_location="destination well") 
+            # left_pipette.transfer(5, tube_rack_1.wells_by_name()[std_pickup], black_plate.wells_by_name()[std_dropoff2],
+            #             air_gap=5, blow_out=True, blowout_location="destination well") 
 
     # # This loads sample into the TE
     for s in range(loaded_standards, loaded_samples + loaded_standards):
@@ -143,19 +148,19 @@ def run(protocol: protocol_api.ProtocolContext):
         if (s > 71) & (s <= 95):
             left_pipette.transfer(sample_amount, tube_rack_4.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
         if (s > 47) & (s <= 71):
             left_pipette.transfer(sample_amount, tube_rack_3.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
         if (s > 23) & (s <= 47):
             left_pipette.transfer(sample_amount, tube_rack_2.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
         if (s >= 0) & (s <= 23):
             left_pipette.transfer(sample_amount, tube_rack_1.wells_by_name()[sample_pickup],
                                   dilution_plate.wells_by_name()[sample_dropoff],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
     # # Pauses the protocol
     protocol.pause('Please take plate, cover it and vortex. then place plate back where it was.')
 
@@ -165,19 +170,19 @@ def run(protocol: protocol_api.ProtocolContext):
         if (s > 71) & (s <= 95):
             left_pipette.transfer(5, dilution_plate.wells_by_name()[sample_position],
                                   black_plate.wells_by_name()[sample_position],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
         if (s > 47) & (s <= 71):
             left_pipette.transfer(5, dilution_plate.wells_by_name()[sample_position],
                                   black_plate.wells_by_name()[sample_position],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
         if (s > 23) & (s <= 47):
             left_pipette.transfer(5, dilution_plate.wells_by_name()[sample_position],
                                   black_plate.wells_by_name()[sample_position],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
         if (s >= 0) & (s <= 23):
             left_pipette.transfer(5, dilution_plate.wells_by_name()[sample_position],
                                   black_plate.wells_by_name()[sample_position],
-                                  air_gap=5)
+                                  air_gap=5, blow_out=True, blowout_location="destination well")
 
 
 ######################################## methods to be used in protocol ############################################

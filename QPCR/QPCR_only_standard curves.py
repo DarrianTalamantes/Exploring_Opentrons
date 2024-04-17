@@ -8,7 +8,7 @@ metadata = {
     'protocolName': 'QPCR of standard curves, 4 primer sets',
     'author': 'Roy II <darrianrtalamantes6@gmail.com>',
     'description': 'A protocol that will carry out the testing of multiple standard curves. Uses 3 sets of a 5 part '
-                   'dilution',
+                   'dilution. 4 primers',
     'apiLevel': '2.9'
 }
 
@@ -28,7 +28,7 @@ def run(protocol: protocol_api.ProtocolContext):
     starting_sample = 1  # Current sample number. Essentially changes position machine starts on the 384 plate
     # I suggest doing no more than 95 samples. That will be enough for exactly one tip box. Max is 96. (include
     # standards here)
-    Primers = 2  # This is how many different primers you are testing.
+    Primers = 4  # This is how many different primers you are testing.
     master_mix_loaded = False  # Is the master mix loaded already? False or True
     current_tip_20 = "A1"  # Where the P20 single should start on tip box. Always starts on location 8.
     master_mix_location = "A1"  # Location of master mix on tube_rack2
